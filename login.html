@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Fitness & Wellness Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 h-screen flex items-center justify-center">
+    <div class="bg-gray-800 p-8 rounded-xl shadow-lg w-96">
+        <h2 class="text-2xl font-bold mb-6 text-center text-blue-400">Login</h2>
+        <form id="loginForm">
+            <div class="mb-4">
+                <label for="email" class="block text-gray-300 text-sm font-medium mb-2">Email Address</label>
+                <input type="email" id="email" name="email" 
+                       class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                       placeholder="Enter your email">
+                <p id="emailError" class="text-red-500 text-xs mt-1 hidden">Please enter a valid email address.</p>
+                <p id="emailNotFound" class="text-red-500 text-xs mt-1 hidden">Email not registered. Please sign up first.</p>
+            </div>
+            <div class="mb-6">
+                <label for="password" class="block text-gray-300 text-sm font-medium mb-2">Password</label>
+                <input type="password" id="password" name="password" 
+                       class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                       placeholder="Enter your password">
+                <p id="passwordError" class="text-red-500 text-xs mt-1 hidden">Password must be at least 6 characters.</p>
+                <p id="invalidPassword" class="text-red-500 text-xs mt-1 hidden">Incorrect password.</p>
+            </div>
+            <div class="flex items-center justify-between mb-4">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200">
+                    Log In
+                </button>
+                <a href="#" class="text-sm text-blue-400 hover:underline">Forgot Password?</a>
+            </div>
+            <p class="text-center text-gray-400 text-sm">
+                Don't have an account? <a href="signup.html" class="font-semibold text-blue-400 hover:underline">Sign Up</a>
+            </p>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const emailError = document.getElementById('emailError');
+            const emailNotFound = document.getElementById('emailNotFound');
+            const passwordError = document.getElementById('passwordError');
+            const invalidPassword = document.getElementById('invalidPassword');
+
+            // Reset error messages
+            emailError.classList.add('hidden');
+            emailNotFound.classList.add('hidden');
+            passwordError.classList.add('hidden');
+            invalidPassword.classList.add('hidden');
+
+            let isValid = true;
+
+            // Validate email format
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                emailError.classList.remove('hidden');
+                isValid = false;
+            }
+
+            // Validate password length
+            if (!password || password.length < 6) {
+                passwordError.classList.remove('hidden');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Check against stored users
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(user => user.email === email);
+
+            if (!user) {
+                emailNotFound.classList.remove('hidden');
+                return;
+            }
+
+            if (user.password !== password) {
+                invalidPassword.classList.remove('hidden');
+                return;
+            }
+
+            // Store current user in session
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            
+            // Redirect to main page
+            window.location.href = 'functionality.html';
+        });
+    </script>
+</body>
+</html>

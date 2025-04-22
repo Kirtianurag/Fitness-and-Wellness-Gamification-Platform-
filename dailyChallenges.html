@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Challenges</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 min-h-screen flex items-center justify-center">
+    <div class="challenges bg-blue-100 shadow-md rounded-lg p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">Daily Challenges</h3>
+        <ul id="dailyChallenges" class="list-disc pl-5 space-y-2">
+            <li class="flex justify-between items-center">
+                <span>Run 5 km</span>
+                <button class="text-red-500 hover:text-red-700" onclick="deleteChallenge(this)">Delete</button>
+            </li>
+            <li class="flex justify-between items-center">
+                <span>Complete 30 Push-ups</span>
+                <button class="text-red-500 hover:text-red-700" onclick="deleteChallenge(this)">Delete</button>
+            </li>
+            <li class="flex justify-between items-center">
+                <span>Drink 3 liters of water</span>
+                <button class="text-red-500 hover:text-red-700" onclick="deleteChallenge(this)">Delete</button>
+            </li>
+        </ul>
+        <form id="addChallengeForm" class="mt-4 flex" onsubmit="addChallenge(event)">
+            <input type="text" id="newChallenge" class="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Add your workout (e.g., Squats)" required />
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600">Add</button>
+        </form>
+        <button onclick="completeChallenge()" class="mt-4 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Complete Challenge</button>
+    </div>
+
+    <script>
+        function addChallenge(event) {
+            event.preventDefault();
+            const newChallengeInput = document.getElementById('newChallenge');
+            const newChallenge = newChallengeInput.value.trim();
+            if (newChallenge) {
+                const dailyChallenges = document.getElementById('dailyChallenges');
+                const newListItem = document.createElement('li');
+                newListItem.className = "flex justify-between items-center";
+                newListItem.innerHTML = `
+                    <span>${newChallenge}</span>
+                    <button class="text-red-500 hover:text-red-700" onclick="deleteChallenge(this)">Delete</button>
+                `;
+                dailyChallenges.appendChild(newListItem);
+                newChallengeInput.value = '';
+            }
+        }
+
+        function deleteChallenge(button) {
+            const listItem = button.parentElement;
+            listItem.remove();
+        }
+
+        function completeChallenge() {
+            alert('Challenge completed!');
+        }
+    </script>
+</body>
+</html>
