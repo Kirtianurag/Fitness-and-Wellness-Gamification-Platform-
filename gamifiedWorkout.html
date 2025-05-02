@@ -1,185 +1,372 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Progress Tracker + Milestones</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Quest</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      font-family: 'Roboto', sans-serif;
+      color: #fff;
+    }
+    header {
+      background: rgba(17, 24, 39, 0.9);
+      border-bottom: 2px solid #facc15;
+    }
+    .card {
+      background: #1f2937;
+      border: 2px solid #10b981;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+    }
+    .progress-bar {
+      background: #1f2937;
+      border: 2px solid #facc15;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      background: #facc15;
+      height: 100%;
+      transition: width 1s ease-in-out;
+    }
+    .badge {
+      background: #3b82f6;
+      border-radius: 8px;
+      padding: 4px 8px;
+      margin: 2px;
+    }
+    .game-button {
+      background: #10b981;
+      border-radius: 8px;
+      padding: 8px 16px;
+      transition: transform 0.2s;
+    }
+    .game-button:hover {
+      transform: translateY(-2px);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #1f2937;
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #facc15;
+      max-width: 400px;
+      width: 90%;
+    }
+    .challenge-item {
+      background: #374151;
+      border: 2px solid #10b981;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .challenge-item:hover {
+      background: #4b5563;
+    }
+    .challenge-item.selected {
+      background: #10b981;
+      color: #fff;
+    }
+    .avatar {
+      border: 2px solid #facc15;
+      border-radius: 50%;
+    }
+  </style>
 </head>
-<body class="bg-gray-300 from-gray-900 via-gray-800 to-gray-900 text-gray-100 min-h-screen p-6 font-sans">
+<body class="min-h-screen">
+  <header class="p-4 flex justify-between items-center sticky top-0">
+    <h1 class="text-xl text-yellow-400">🏋️‍♂️ Fitness Quest</h1>
+    <div class="flex space-x-2">
+      <button id="resetBtn" class="game-button text-black bg-yellow-400">Reset</button>
+      <button id="logoutBtn" class="game-button bg-red-500">Exit</button>
+    </div>
+  </header>
 
-  <div class="max-w-3xl mx-auto space-y-6">
-
-    <h1 class="text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-green-600 tracking-wide py-4 animate-pulse">🎯 Progress Tracker</h1>
-
-    <!-- Goal Setting -->
-    <div class="bg-gray-800/90 p-6 rounded-xl shadow-2xl border border-gray-700 hover:border-blue-500 transition-all duration-300">
-      <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-300">Set Your Goals</h2>
-      <label for="stepsGoalInput" class="block mb-2 text-sm font-medium text-gray-300">Steps Goal:</label>
-      <input type="number" id="stepsGoalInput" placeholder="Enter steps goal"
-             class="w-full p-3 rounded-lg bg-gray-900/80 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 transition duration-200">
-      
-      <label for="workoutsGoalInput" class="block mt-4 mb-2 text-sm font-medium text-gray-300">Workouts Goal:</label>
-      <input type="number" id="workoutsGoalInput" placeholder="Enter workouts goal"
-             class="w-full p-3 rounded-lg bg-gray-900/80 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 transition duration-200">
-      
-      <button onclick="setGoals()"
-              class="mt-4 px-5 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105">Set Goals</button>
+  <main class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="card p-4">
+      <h2 class="text-lg text-green-400 mb-2">🧙‍♂️ Profile</h2>
+      <div class="flex items-center mb-2">
+        <img id="userAvatar" src="https://api.dicebear.com/9.x/pixel-art/svg?seed=Arav" alt="Avatar" class="avatar w-12 h-12 mr-2">
+        <div>
+          <p><strong>Name:</strong> <span id="userName">Arav</span> <button id="editProfile" class="text-blue-400 text-sm">[Edit]</button></p>
+          <p><strong>Level:</strong> <span id="userLevel">3</span></p>
+          <p><strong>Streak:</strong> <span id="streakCount">0 days 🔥</span></p>
+        </div>
+      </div>
+      <p><strong>XP:</strong> <span id="currentXP">250</span> / 300</p>
+      <div class="progress-bar h-4 w-full mt-2">
+        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+      </div>
+      <p><strong>Badges:</strong></p>
+      <div id="badges" class="flex flex-wrap gap-2 mt-2"></div>
     </div>
 
-    <!-- Update Progress -->
-    <div class="bg-gray-800/90 p-6 rounded-xl shadow-2xl border border-gray-700 hover:border-green-500 transition-all duration-300">
-      <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-300">Update Your Progress</h2>
-      
-      <label for="stepsInput" class="block mb-2 text-sm font-medium text-gray-300">Steps Taken:</label>
-      <input type="number" id="stepsInput" placeholder="Enter steps taken"
-             class="w-full p-3 rounded-lg bg-gray-900/80 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-500 transition duration-200">
-
-      <label for="exercisesInput" class="block mt-4 mb-2 text-sm font-medium text-gray-300">Workouts Completed:</label>
-      <input type="number" id="exercisesInput" placeholder="Enter workouts completed"
-             class="w-full p-3 rounded-lg bg-gray-900/80 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent placeholder-gray-500 transition duration-200">
-      
-      <button onclick="updateProgress()"
-              class="mt-4 px-5 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105">Update Progress</button>
+    <div class="card p-4">
+      <h2 class="text-lg text-green-400 mb-2">🏆 Leaderboard</h2>
+      <div id="leaderboard" class="text-sm"></div>
     </div>
 
-    <!-- Progress Summary -->
-    <div class="bg-gray-800/90 p-6 rounded-xl shadow-2xl border border-gray-700 hover:border-purple-500 transition-all duration-300">
-      <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-fuchsia-300">Progress Summary</h2>
-      <ul class="space-y-3 text-lg">
-        <li class="flex items-center">🔥 <span class="ml-2">Calories Burned:</span> <span id="caloriesBurned" class="ml-auto font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">0.00</span> <span class="ml-1">kcal</span></li>
-        <li class="flex items-center">👣 <span class="ml-2">Steps Taken:</span> <span id="stepsTaken" class="ml-auto font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-400">0</span></li>
-        <li class="flex items-center">💪 <span class="ml-2">Workouts Completed:</span> <span id="workoutsCompleted" class="ml-auto font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">0</span></li>
-        <li class="flex items-center">🏅 <span class="ml-2">Points Earned:</span> <span id="pointsEarned" class="ml-auto font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">0</span></li>
-      </ul>
-      <p id="achievementStatus" class="mt-4 text-lg font-medium text-center py-2 rounded-lg bg-gray-900/50 border border-gray-700 transition-all duration-300">Keep going! You're almost there!</p>
+    <div class="card p-4">
+      <h2 class="text-lg text-green-400 mb-2">📜 Achievements</h2>
+      <div id="achievementsLog" class="max-h-40 overflow-y-auto text-sm"></div>
     </div>
 
-    <!-- Milestones -->
-    <div class="bg-gray-800/90 p-6 rounded-xl shadow-2xl border border-gray-700 hover:border-pink-500 transition-all duration-300">
-      <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-rose-300">Milestones</h2>
-      <p id="milestoneMessage" class="text-xl font-bold text-center text-white mb-3"></p>
-      <div id="milestoneSymbol" class="text-6xl mt-2 text-center animate-bounce"></div>
+    <div class="card p-4 lg:col-span-2">
+      <h2 class="text-lg text-green-400 mb-2">⚔️ Quests</h2>
+      <select id="questFilter" class="bg-gray-700 text-white p-2 rounded mb-2">
+        <option value="all">All</option>
+        <option value="Strength">Strength</option>
+        <option value="Cardio">Cardio</option>
+        <option value="Mindfulness">Mindfulness</option>
+      </select>
+      <div id="challengeList" class="max-h-60 overflow-y-auto"></div>
+      <button id="startChallenge" class="game-button mt-2 w-full bg-green-600">Start Quest</button>
     </div>
+  </main>
 
-    <!-- Share -->
-    <div class="bg-gray-800/90 p-6 rounded-xl shadow-2xl border border-gray-700 hover:border-indigo-500 transition-all duration-300">
-      <h3 class="text-xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-violet-300">Share Your Achievement</h3>
-      <p id="shareText" class="mb-4 p-3 bg-gray-900/50 rounded-lg text-gray-200 border border-gray-700">
-        I just unlocked a new fitness milestone in my workout tracker! 💪 #FitnessGoals #MilestoneAchieved
-      </p>
-      <div class="flex flex-wrap gap-3 justify-center">
-        <a id="facebookShare" target="_blank"
-           class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg text-white font-medium shadow transition-all duration-300 transform hover:scale-105 flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd"></path></svg>
-          Facebook
-        </a>
-        <a id="linkedinShare" target="_blank"
-           class="px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg text-white font-medium shadow transition-all duration-300 transform hover:scale-105 flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-          LinkedIn
-        </a>
-        <a id="twitterShare" target="_blank"
-           class="px-4 py-2.5 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 rounded-lg text-white font-medium shadow transition-all duration-300 transform hover:scale-105 flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"/></svg>
-          Twitter
-        </a>
-        <button onclick="copyToClipboard()"
-                class="px-4 py-2.5 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 rounded-lg text-white font-medium shadow transition-all duration-300 transform hover:scale-105 flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-          Copy for Instagram
-        </button>
+  <div id="editProfileModal" class="modal">
+    <div class="modal-content">
+      <h2 class="text-lg text-yellow-400 mb-2">Edit Profile</h2>
+      <label for="editName" class="block text-sm">Name:</label>
+      <input id="editName" type="text" class="bg-gray-700 text-white p-2 rounded w-full" value="Arav">
+      <label for="editAvatar" class="block text-sm mt-2">Avatar Seed:</label>
+      <input id="editAvatar" type="text" class="bg-gray-700 text-white p-2 rounded w-full" value="Arav">
+      <div class="flex justify-end space-x-2 mt-4">
+        <button id="saveProfile" class="game-button bg-green-600">Save</button>
+        <button id="cancelProfile" class="game-button bg-red-600">Cancel</button>
       </div>
     </div>
+  </div>
 
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2 class="text-lg text-yellow-400 mb-2">🏆 Quest Complete!</h2>
+      <p id="modalMessage"></p>
+      <button id="closeModal" class="game-button mt-2 bg-blue-600">Claim Rewards</button>
+    </div>
   </div>
 
   <script>
-    let stepsGoal = 0;
-    let workoutsGoal = 0;
-    let points = 0;
-
-    function setGoals() {
-      stepsGoal = parseInt(document.getElementById("stepsGoalInput").value) || 0;
-      workoutsGoal = parseInt(document.getElementById("workoutsGoalInput").value) || 0;
-      alert("Goals set successfully!");
-    }
-
-    function updateProgress() {
-      const stepsTaken = parseInt(document.getElementById("stepsInput").value) || 0;
-      const workoutsCompleted = parseInt(document.getElementById("exercisesInput").value) || 0;
-      const caloriesBurned = (stepsTaken * 0.04) + (workoutsCompleted * 50);
-
-      document.getElementById("caloriesBurned").textContent = caloriesBurned.toFixed(2);
-      document.getElementById("stepsTaken").textContent = stepsTaken;
-      document.getElementById("workoutsCompleted").textContent = workoutsCompleted;
-
-      const achievementStatus = document.getElementById("achievementStatus");
-
-      if (stepsTaken >= stepsGoal && workoutsCompleted >= workoutsGoal) {
-        achievementStatus.textContent = "🎉 Congratulations! You've achieved your goals!";
-        achievementStatus.classList.remove("text-blue-400");
-        achievementStatus.classList.add("text-green-400", "border-green-500", "bg-green-900/20");
-
-        points += 100;
-        document.getElementById("pointsEarned").textContent = points;
-      } else {
-        achievementStatus.textContent = "Keep going! You're almost there!";
-        achievementStatus.classList.remove("text-green-400", "border-green-500", "bg-green-900/20");
-        achievementStatus.classList.add("text-blue-400");
-      }
-
-      updateMilestone(points);
-    }
-
-    function updateMilestone(points) {
-      const milestoneMessage = document.getElementById('milestoneMessage');
-      const milestoneSymbol = document.getElementById('milestoneSymbol');
-      let milestoneText = '';
-
-      if (points >= 6000) milestoneText = 'Heroic 🏆';
-      else if (points >= 4500) milestoneText = 'Diamond 💎';
-      else if (points >= 3500) milestoneText = 'Platinum 🔹';
-      else if (points >= 2500) milestoneText = 'Gold 🥇';
-      else if (points >= 1500) milestoneText = 'Silver 🥈';
-      else if (points >= 500) milestoneText = 'Bronze 🥉';
-
-      if (milestoneText) {
-        milestoneMessage.textContent = `You have reached ${milestoneText.split(' ')[0]}!`;
-        milestoneSymbol.textContent = milestoneText.split(' ')[1];
-        generateShareMessage(milestoneText.split(' ')[0]);
-      } else {
-        milestoneMessage.textContent = 'Keep going to reach your first milestone!';
-        milestoneSymbol.textContent = '';
-        generateShareMessage('a new');
-      }
-    }
-
-    function generateShareMessage(milestone) {
-      const message = `I just unlocked the ${milestone} milestone in my workout tracker! 💪 #FitnessGoals #MilestoneAchieved`;
-      const encodedMessage = encodeURIComponent(message);
-      const currentUrl = encodeURIComponent(window.location.href);
-
-      document.getElementById("shareText").textContent = message;
-
-      document.getElementById("facebookShare").href =
-        `https://www.facebook.com/sharer/sharer.php?u=${currentUrl}&quote=${encodedMessage}`;
-      document.getElementById("linkedinShare").href =
-        `https://www.linkedin.com/sharing/share-offsite/?url=${currentUrl}&summary=${encodedMessage}`;
-      document.getElementById("twitterShare").href =
-        `https://twitter.com/intent/tweet?text=${encodedMessage}&url=${currentUrl}`;
-    }
-
-    function copyToClipboard() {
-      const text = document.getElementById("shareText").textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Copied to clipboard! You can now paste it on Instagram 📸");
-      });
-    }
-
-    window.onload = () => {
-      generateShareMessage('a new');
+    const challenges = [
+      { id: 1, name: "30-Min HIIT", xp: 50, badge: "Energizer", category: "Strength" },
+      { id: 2, name: "5K Run", xp: 70, badge: "Speedster", category: "Cardio" },
+      { id: 3, name: "Yoga", xp: 30, badge: "Zen", category: "Mindfulness" },
+      { id: 4, name: "100 Push-Ups", xp: 60, badge: "Iron Arm", category: "Strength" },
+    ];
+  
+    let user = JSON.parse(localStorage.getItem("user")) || {
+      name: "Arav",
+      level: 3,
+      xp: 250,
+      badges: ["Energizer"],
+      completedChallenges: [],
+      streak: 0,
+      lastLogin: null,
+      avatarSeed: "Arav",
+      achievements: []
     };
+  
+    let leaderboardData = [
+      { name: "Arav", xp: 250, level: 3 },
+      { name: "HeroX", xp: 450, level: 4 },
+      { name: "FitGuru", xp: 320, level: 3 },
+    ];
+  
+    $(document).ready(function() {
+      updateUserUI();
+      renderChallenges();
+      renderLeaderboard();
+      renderAchievements();
+      updateStreak();
+  
+      $("#resetBtn").click(() => {
+        if (confirm("Reset all progress?")) {
+          user = {
+            name: "Arav",
+            level: 3,
+            xp: 250,
+            badges: ["Energizer"],
+            completedChallenges: [],
+            streak: 0,
+            lastLogin: null,
+            avatarSeed: "Arav",
+            achievements: []
+          };
+          // Reset user's leaderboard entry
+          leaderboardData = leaderboardData.filter(u => u.name !== user.name);
+          leaderboardData.push({ name: user.name, xp: user.xp, level: user.level });
+          localStorage.setItem("user", JSON.stringify(user));
+          updateUserUI();
+          renderChallenges();
+          renderLeaderboard();
+          renderAchievements();
+          $("#progressFill").animate({ width: `${(user.xp / 300) * 100}%` }, 1000);
+        }
+      });
+  
+      $("#logoutBtn").click(() => {
+        localStorage.removeItem("user");
+        window.location.reload();
+      });
+  
+      $("#startChallenge").click(() => {
+        const selected = $(".challenge-item.selected");
+        if (!selected.length) return alert("Select a quest!");
+        const challenge = challenges.find(c => c.id == selected.data("id"));
+        if (challenge) completeChallenge(challenge);
+      });
+  
+      $(document).on("click", ".challenge-item", function() {
+        $(".challenge-item").removeClass("selected");
+        $(this).addClass("selected");
+      });
+  
+      $("#questFilter").change(renderChallenges);
+  
+      $("#editProfile").click(() => {
+        $("#editName").val(user.name);
+        $("#editAvatar").val(user.avatarSeed);
+        $("#editProfileModal").fadeIn();
+      });
+  
+      $("#saveProfile").click(() => {
+        const name = $("#editName").val().trim();
+        const avatarSeed = $("#editAvatar").val().trim();
+        if (name && avatarSeed) {
+          // Update leaderboard if name changes
+          const oldName = user.name;
+          user.name = name;
+          user.avatarSeed = avatarSeed;
+          leaderboardData = leaderboardData.map(u => u.name === oldName ? { ...u, name } : u);
+          localStorage.setItem("user", JSON.stringify(user));
+          updateUserUI();
+          renderLeaderboard();
+          $("#editProfileModal").fadeOut();
+        } else {
+          alert("Enter name and avatar seed!");
+        }
+      });
+  
+      $("#cancelProfile, #closeModal").click(function() {
+        $(this).closest(".modal").fadeOut();
+      });
+  
+      $(".modal").on("keydown", e => {
+        if (e.key === "Escape") $(e.target).closest(".modal").fadeOut();
+      });
+    });
+  
+    function updateStreak() {
+      const today = new Date().toISOString().split('T')[0];
+      if (user.lastLogin !== today) {
+        const yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split('T')[0];
+        user.streak = user.lastLogin === yesterday ? user.streak + 1 : 1;
+        user.lastLogin = today;
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+      $("#streakCount").text(`${user.streak} days 🔥`);
+    }
+  
+    function renderChallenges() {
+      const filter = $("#questFilter").val();
+      const filtered = filter === "all" ? challenges : challenges.filter(c => c.category === filter);
+      let html = filtered.map(c => `
+        <div class="challenge-item p-2 mb-2 ${user.completedChallenges.includes(c.id) ? "opacity-50" : ""}" data-id="${c.id}">
+          <p class="font-bold">${c.name}</p>
+          <p>Reward: +${c.xp} XP</p>
+          ${user.completedChallenges.includes(c.id) ? "<p>Completed</p>" : ""}
+        </div>
+      `).join("");
+      $("#challengeList").html(html || "<p>No quests!</p>");
+    }
+  
+    function renderLeaderboard() {
+      // Update or add user's entry in leaderboardData
+      const userEntry = leaderboardData.find(u => u.name === user.name);
+      if (userEntry) {
+        userEntry.xp = user.xp;
+        userEntry.level = user.level;
+      } else {
+        leaderboardData.push({ name: user.name, xp: user.xp, level: user.level });
+      }
+  
+      // Sort by XP (descending), then level (descending)
+      leaderboardData.sort((a, b) => {
+        if (b.xp !== a.xp) return b.xp - a.xp;
+        return b.level - a.level;
+      });
+  
+      // Render top 3
+      const html = leaderboardData.slice(0, 3).map((entry, i) => `
+        <div class="p-2 flex justify-between">
+          <span>${i + 1}. ${entry.name}</span>
+          <span>Level ${entry.level} | ${entry.xp} XP</span>
+        </div>
+      `).join("");
+      $("#leaderboard").html(html || "<p>No leaderboard data!</p>");
+    }
+  
+    function renderAchievements() {
+      const html = user.achievements.slice().reverse().map(a => `
+        <div class="p-2 border-b border-gray-600">
+          <p>${a.message}</p>
+          <p class="text-gray-400 text-xs">${a.date}</p>
+        </div>
+      `).join("") || "<p>No achievements!</p>";
+      $("#achievementsLog").html(html);
+    }
+  
+    function completeChallenge(challenge) {
+      if (user.completedChallenges.includes(challenge.id)) return alert("Quest already completed!");
+      user.xp += challenge.xp;
+      user.completedChallenges.push(challenge.id);
+      user.achievements.push({ message: `Completed "${challenge.name}"!`, date: new Date().toLocaleString() });
+      if (user.xp >= 300) {
+        user.level += 1;
+        user.xp %= 300;
+        user.achievements.push({ message: `Reached Level ${user.level}!`, date: new Date().toLocaleString() });
+      }
+      if (!user.badges.includes(challenge.badge)) user.badges.push(challenge.badge);
+      localStorage.setItem("user", JSON.stringify(user));
+      updateUserUI();
+      renderChallenges();
+      renderLeaderboard(); // Ensure leaderboard updates
+      renderAchievements();
+      $("#modalMessage").html(`Earned ${challenge.xp} XP!<br>Unlocked "${challenge.badge}" badge!`);
+      $("#modal").fadeIn();
+      confetti({ particleCount: 100, spread: 70 });
+      $("#progressFill").animate({ width: `${(user.xp / 300) * 100}%` }, 1000);
+    }
+
+    function updateUserUI() {
+      $("#userName").text(user.name);
+      $("#userLevel").text(user.level);
+      $("#currentXP").text(user.xp);
+      $("#badges").html(user.badges.map(b => `<span class="badge">${b}</span>`).join(""));
+      $("#streakCount").text(`${user.streak} days 🔥`);
+      $("#userAvatar").attr("src", `https://api.dicebear.com/9.x/pixel-art/svg?seed=${user.avatarSeed}`);
+      $("#progressFill").css("width", `${(user.xp / 300) * 100}%`);
+    }
   </script>
 </body>
 </html>
